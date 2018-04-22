@@ -17,17 +17,18 @@ def read_and_filter_csv(csv_path):
                 Record(row[0], row[1], row[2], row[3], row[4], row[5],
                        row[6], row[7], row[8], row[9], row[10], row[11], row[12]))
         f.close()
-
     record_list = list(filter(lambda p: STATION_ID == p.station_id, record_list))
     return record_list
 
 
-def save_to_csv(csv_path, ztd_average_list):
+def save_to_csv(csv_path, date_list, ztd_average_list):
     with open(csv_path, 'w') as file:
+        i = 0
         for ztd_average in ztd_average_list:
             for ztd in ztd_average:
-                file.write(str(ztd))
+                file.write(date_list[i] + "," + str(ztd) + ",")
                 file.write('\n')
+                i += 1
     file.close()
 
 
@@ -87,6 +88,21 @@ def count_average_ztd_last_files(record_list):
     return ztd_last_files
 
 
+def get_dates(directory_path):
+    files = [file for file in listdir(directory_path) if isfile(join(directory_path, file))]
+    files.sort()
+    record_list = []
+    date_list = []
+    for file in files:
+        if file != ".DS_Store":
+            record_list = process_file(directory_path + "/" + file, [])
+            for i in range(0, 6):
+                date_list.append(record_list[0][i].get_date())
+    for i in range(6, 24):
+        date_list.append(record_list[0][i].get_date())
+    return date_list
+
+
 def process_files_in_directory(directory_path):
     files = [file for file in listdir(directory_path) if isfile(join(directory_path, file))]
     files.sort()
@@ -95,7 +111,7 @@ def process_files_in_directory(directory_path):
     ztd_average_list = []
     for file in files:
         if file != ".DS_Store":
-            print(file)
+            print(file)  # debug; todo delete
             record_list = process_file(directory_path + "/" + file, record_list)
             if position >= 3:
                 if position != 3:
@@ -106,7 +122,8 @@ def process_files_in_directory(directory_path):
             print(record_list.__len__())  # debug; todo delete
             position += 1
     ztd_average_list.extend(count_average_ztd_last_files(record_list))
-    save_to_csv(OUTPUT_PATH, ztd_average_list)
+    date_list = get_dates(directory_path)
+    save_to_csv(OUTPUT_PATH, date_list, ztd_average_list)
 
 
 def main():

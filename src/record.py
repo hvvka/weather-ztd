@@ -37,3 +37,6 @@ class Record:
             p = float(self.pressure)
         zdt = 0.002277 * (p + (1255 / float(self.temperature) + 0.05) * e)
         return zdt
+
+    def get_date(self):
+        return str(self.date + " " + self.time)
